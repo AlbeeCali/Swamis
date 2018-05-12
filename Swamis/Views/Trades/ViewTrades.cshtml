@@ -1,0 +1,97 @@
+﻿@model Sawtooth.Swamis.Models.SearchModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>View Trades</h2>
+<p>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                @Html.LabelFor(m => m.StartDate, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.StartDate, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.EndDate, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.EndDate, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="View Trades" class="btn btn-default" />
+                    @Html.ActionLink("Create New", "Create", " TradesController", new { @class = "btn btn-default" })
+
+                </div>
+            </div>
+        </div>
+    }
+
+
+</p>
+
+<table class="table">
+    <tr>
+        <th>Date</th>
+        <th>Symbol</th>
+        <th>Open</th>
+        <th>Hi</th>
+        <th>Low</th>
+        <th>Close</th>
+        <th>Vol</th>
+        <th>Id</th>
+        <th></th>
+    </tr>
+    @if (Model.DailyTradesModel.Count > 0)
+    {
+        foreach (var dt in Model.DailyTradesModel)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(x => dt.CloseDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.Symbol)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.sOpenPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.sHiPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.sLowPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.sClosePrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.Volume)
+                </td>
+                <td>
+                    @Html.DisplayFor(x => dt.Id)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = dt.Id })
+                </td>
+            </tr>
+        }
+    }
+</table>
+<p>
+    |
+</p>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

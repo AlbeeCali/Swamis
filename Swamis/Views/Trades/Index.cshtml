@@ -1,0 +1,82 @@
+﻿@model Sawtooth.Swamis.Models.SearchModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<h2>Trades Home</h2>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.Label("Quote Date", new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.EditorFor(m => m.StartDate, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Signal Date", new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.EditorFor(m => m.EndDate, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("GOLD", new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.DailyTradesModel[0].Symbol, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("S & P", new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.DailyTradesModel[1].Symbol, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("TREASURY", new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.DailyTradesModel[2].Symbol, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="View Trades" class="btn btn-default" />
+
+                @Html.ActionLink("Create New", "Create", "TradesController", new { @class = "btn btn-default" })
+                @Html.ActionLink("Get Quotes", "Create", "TradesController", new { @class = "btn btn-default" })
+                @Html.ActionLink("Get Triggers", "Create", "TradesController", new { @class = "btn btn-default" })
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+
+     $(document).ready(function () {
+         $('input[type=datetime]').datepicker({
+             dateFormat: "dd/M/yy",
+             changeMonth: true,
+             changeYear: true,
+             yearRange: "-60:+0"
+         });
+
+     });
+</script>  
+}
