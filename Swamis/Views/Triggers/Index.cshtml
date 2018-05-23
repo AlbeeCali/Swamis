@@ -15,7 +15,7 @@
         <div class="form-group">
             @Html.LabelFor(m => m.TradeDate, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
-                @Html.TextBoxFor(m => m.TradeDate, new { @class = "form-control" })
+                @Html.EditorFor(m => m.TradeDate, new { @class = "form-control" })
             </div>
         </div>
 
@@ -29,5 +29,21 @@
 
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/jqueryval")
+
+@Scripts.Render("~/bundles/jqueryui")
+@Styles.Render("~/Content/cssjqryUi")
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('input[type=datetime]').datepicker({
+            dateFormat: "dd/M/yy",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "-60:+0"
+        });
+
+    });
+
+</script> 
 }
