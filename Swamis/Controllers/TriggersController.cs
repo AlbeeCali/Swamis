@@ -10,6 +10,7 @@ using System.Web.Script.Serialization;
 
 using Sawtooth.GV_Entities;
 using Sawtooth.Common;
+using SawTooth.GV_Bus;
 
 using System.Threading.Tasks;
 using Sawtooth.Swamis.Controllers;
@@ -24,7 +25,19 @@ namespace Sawtooth.Swamis.Controllers
         public ActionResult Index()
         {
             DailyTriggersModel dt = new DailyTriggersModel();
-            DateTime tradeDate = DateTime.Today.AddDays(1);
+            DateTime tradeDate = DateTime.Today;
+            switch (DateTime.Today.DayOfWeek)
+            {
+                case DayOfWeek.Friday:
+                    tradeDate = DateTime.Today.AddDays(3);
+                    break;
+                case DayOfWeek.Saturday:
+                    tradeDate = DateTime.Today.AddDays(2);
+                    break;
+                default:
+                    tradeDate = DateTime.Today.AddDays(1);
+                    break;
+            }
             dt.TradeDate = tradeDate;
             return View(dt);
         }
@@ -36,6 +49,21 @@ namespace Sawtooth.Swamis.Controllers
         }
 
         public ActionResult ViewTriggers(DateTime tradeDate)
+        {
+            DailyTriggersModel dt = new DailyTriggersModel();
+            MongoEngine db = new MongoEngine();
+            DailyTriggers trigger = new DailyTriggers { TradeDate = tradeDate };
+            List<DailyTriggers> triggers = db.GetTrigger(trigger);
+            if (triggers.Count > 0)
+            {
+                dt.TradeDate = triggers.First().TradeDate;
+                dt.Patterns = triggers.First().Patterns;
+            }
+            //dt.Patterns = dt.Patterns.OrderBy(pp => pp.Contract).ThenBy(pp => pp.TradeType) as List<PricePattern>;
+            return View(dt);
+        }
+
+        public ActionResult ViewTriggersSvc(DateTime tradeDate)
         {
             DailyTriggersModel dt = new DailyTriggersModel();
             string path = ConfigurationManager.AppSettings["triggersSvc"];
@@ -55,6 +83,7 @@ namespace Sawtooth.Swamis.Controllers
             }
 
             return View(dt);
+
         }
 
 

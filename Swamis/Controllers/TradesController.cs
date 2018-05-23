@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Script;
@@ -10,6 +11,7 @@ using System.Web.Script.Serialization;
 
 using Sawtooth.GV_Entities;
 using Sawtooth.Common;
+using SawTooth.GV_Bus;
 
 using System.Threading.Tasks;
 using Sawtooth.Swamis.Controllers;
@@ -24,16 +26,21 @@ namespace Swamis.Controllers
         public ActionResult Index()
         {
             SearchModel model = new SearchModel();
-            model.StartDate = DateTime.Today;
+
             switch (DateTime.Today.DayOfWeek)
             {
                 case DayOfWeek.Friday:
                     model.EndDate = DateTime.Today.AddDays(3);
                     break;
                 case DayOfWeek.Saturday:
+                    model.StartDate = DateTime.Today.AddDays(-1);
                     model.EndDate = DateTime.Today.AddDays(2);
                     break;
+                case DayOfWeek.Sunday:
+                    model.StartDate = DateTime.Today.AddDays(-2);
+                    break;
                 default:
+                    model.StartDate = DateTime.Today;
                     model.EndDate = DateTime.Today.AddDays(1);
                     break;
             }
@@ -43,14 +50,61 @@ namespace Swamis.Controllers
             dailies.Add(new DailyTradesModel { Symbol = StaticRoutines.GetSymbol("SP", DateTime.Today) });
             dailies.Add(new DailyTradesModel { Symbol = StaticRoutines.GetSymbol("ZB", DateTime.Today) });
             model.DailyTradesModel = dailies;
-
+            model.DoQuote = false;
+            model.DoTrigger = false;
             return View(model);
         }
 
         [HttpPost]
         public ActionResult Index(SearchModel model)
         {
-            return RedirectToAction("ViewTrades", new { startDate = model.StartDate, endDate = model.EndDate });
+            //TODO:  add notification to page
+            StringBuilder sb = new StringBuilder();
+            if (model.DoQuote)
+            {
+                try
+                {
+                    MongoEngine db = new MongoEngine();
+                    Quoter qs = new Quoter();
+                    foreach (DailyTradesModel mm in model.DailyTradesModel)
+                    {
+                        List<DailyTrades> tt = qs.GetBarchartHistory(model.StartDate, mm.Symbol);
+                        DailyTrades dd = tt.FirstOrDefault(x => x.CloseDate == model.StartDate);
+                        sb.AppendLine(string.Format("{0}: Open: {1}, Hi: {2}, Low: {3}, Close: {4}\n",
+                            dd.Symbol, dd.OpenPrice.ToString(), dd.HiPrice.ToString(), dd.LowPrice.ToString(), dd.ClosePrice.ToString()));
+                        db.UpdateTrade(dd);
+                    }
+
+                }
+                catch (Exception exc)
+                {
+                    //MessageBox.Show("Error during quote retrieval: " + exc.Message);
+                    string msg = exc.Message;
+                    sb.AppendLine(exc.Message);
+                    sb.AppendLine(exc.StackTrace);
+                }
+
+            }
+            if(model.DoTrigger)
+            {
+                try
+                {
+                    Sawtooth.GV_Bus.BusBase bus = new Sawtooth.GV_Bus.BusBase();
+                    List<PricePattern> pp = bus.ProcessTDWSymbol(model.DailyTradesModel[1].Symbol,
+                        model.DailyTradesModel[2].Symbol,
+                        model.DailyTradesModel[0].Symbol,
+                        model.EndDate);
+                    return RedirectToAction("ViewTriggers", "Triggers", new {tradeDate = model.EndDate});
+                }
+                catch (Exception exc)
+                {
+                    sb.AppendLine(exc.Message);
+                    sb.AppendLine(exc.StackTrace);
+                }
+            }
+            ViewBag.Message = sb.ToString();
+            //return RedirectToAction("ViewTrades", new { startDate = model.StartDate, endDate = model.EndDate });
+            return View(model);
         }
 
         public ActionResult ViewTrades(DateTime startDate, DateTime endDate)
@@ -130,8 +184,18 @@ namespace Swamis.Controllers
             //ViewBag.Symbols = GetSymbols();
             DailyTradesModel model = new DailyTradesModel();
             model.TradeSymbols = GetSymbols();
-            model.Symbol = "GC";
-            model.CloseDate = DateTime.Today;
+            switch (DateTime.Today.DayOfWeek)
+            {
+                case DayOfWeek.Sunday:
+                    model.CloseDate = DateTime.Today.AddDays(-2);
+                    break;
+                case DayOfWeek.Saturday:
+                    model.CloseDate = DateTime.Today.AddDays(-1);
+                    break;
+                default:
+                    model.CloseDate = DateTime.Today;
+                    break;
+            }
             return View(model);
         }
 
@@ -142,7 +206,51 @@ namespace Swamis.Controllers
             try
             {
                 string msg = ValidateTrade(model);
-                if(msg == "")
+                if (msg == "")
+                {
+                    DailyTrades dt = new DailyTrades
+                    {
+                        CloseDate = model.CloseDate,
+                        ClosePrice = model.ClosePrice,
+                        HiPrice = model.HiPrice,
+                        Id = model.Id,
+                        LowPrice = model.LowPrice,
+                        OpenPrice = model.OpenPrice,
+                        Volume = model.Volume
+                    };
+                    dt.Symbol = model.Symbol;
+                    if (model.Symbol == "ZB")
+                    {
+                        dt.ClosePrice = StaticRoutines.ThirtyTwoToDec(model.ClosePrice);
+                        dt.HiPrice = StaticRoutines.ThirtyTwoToDec(model.HiPrice);
+                        dt.LowPrice = StaticRoutines.ThirtyTwoToDec(model.LowPrice);
+                        dt.OpenPrice = StaticRoutines.ThirtyTwoToDec(model.OpenPrice);
+                    }
+                    MongoEngine db = new MongoEngine();
+                    List<DailyTrades> trades = new List<DailyTrades>();
+                    trades = db.UpdateTrade(dt);
+                    return View();
+                }
+                else
+                {
+
+                }
+
+                return RedirectToAction("Create");
+            }
+            catch (Exception exc)
+            {
+                return View();
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CreateSvc(DailyTradesModel model)
+        {
+            try
+            {
+                string msg = ValidateTrade(model);
+                if (msg == "")
                 {
                     DailyTrades dt = new DailyTrades
                     {
@@ -155,7 +263,7 @@ namespace Swamis.Controllers
                         Volume = model.Volume
                     };
                     dt.Symbol = StaticRoutines.GetSymbol(model.Symbol, model.CloseDate);
-                    if(model.Symbol == "ZB")
+                    if (model.Symbol == "ZB")
                     {
                         dt.ClosePrice = StaticRoutines.ThirtyTwoToDec(model.ClosePrice);
                         dt.HiPrice = StaticRoutines.ThirtyTwoToDec(model.HiPrice);
@@ -183,7 +291,7 @@ namespace Swamis.Controllers
 
                 return RedirectToAction("Create");
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 return View();
             }
@@ -249,7 +357,7 @@ namespace Swamis.Controllers
             try
             {
                 // TODO: Add update logic here
-                
+
                 return RedirectToAction("Index");
             }
             catch

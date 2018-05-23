@@ -82,9 +82,14 @@ namespace Sawtooth.Swamis.Controllers
             {
                 sb.AppendLine("Low cannot be higher than Close");
             }
-            if(dt.CloseDate > DateTime.Today)
+            if (dt.CloseDate > DateTime.Today)
             {
                 sb.AppendLine("Close date can't be in the future");
+            }
+            if (dt.CloseDate.DayOfWeek == DayOfWeek.Saturday ||
+                dt.CloseDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                sb.AppendLine("Close date must be Monday thru Friday");
             }
             return sb.ToString();
         }
