@@ -19,10 +19,10 @@
         <div class="form-group">
             @Html.LabelFor(m => m.Symbol, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
-                @Html.DropDownListFor(m => m.Symbol, new SelectList(Model.TradeSymbols, "Value", "Text"), "--- select ---")
+                @Html.TextBoxFor(m => m.Symbol, new { @class = "form-control" })
             </div>
         </div>
-        <div class="form-group">
+       <div class="form-group">
             @Html.LabelFor(m => m.OpenPrice, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
                 @Html.TextBoxFor(m => m.OpenPrice, new { @class = "form-control" })
@@ -55,7 +55,7 @@
         <div class="form-group">
             @Html.LabelFor(m => m.CloseDate, new { @class = "col-md-2 control-label" })
             <div class="col-md-10">
-                @Html.TextBoxFor(m => m.CloseDate, new { @class = "form-control" })
+                @Html.EditorFor(m => m.CloseDate, new { @class = "form-control" })
             </div>
         </div>
 
@@ -72,5 +72,4 @@
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
 }
