@@ -42,16 +42,34 @@
     </div>
 
     @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/bootstrap-datepicker")
+        @*
+        @Scripts.Render("~/bundles/bootstrap")
+        @Scripts.Render("~/bundles/bootstrap-datepicker")
 
-    <script>
-        $(function () {
-            $('.datepicker').datepicker({
-                format: 'mm-dd-yyyy'
-            });
+        *@
+
+
+    @Scripts.Render("~/bundles/jqueryui")
+    @Styles.Render("~/Content/cssjqryUi")
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+@section Scripts {
+
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('input[type=datetime]').datepicker({
+            dateFormat: "dd/M/yy",
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "-60:+0"
         });
+
+    });
     </script>
+}
+
 
     @RenderSection("scripts", required: false)
 </body>
