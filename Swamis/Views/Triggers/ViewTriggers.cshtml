@@ -41,17 +41,18 @@
     </tr>
     @if (Model.Patterns != null)
     {
-        foreach (var pp in Model.Patterns)
+        var ssort = Model.Patterns.OrderBy(p => p.Contract).ThenBy(p => p.TradeType);
+        foreach (var pp in ssort)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(x => pp.TradeType)
+                    @Html.DisplayFor(x => pp.Contract)
                 </td>
                 <td>
                     @Html.DisplayFor(x => pp.Code)
                 </td>
                 <td>
-                    @Html.DisplayFor(x => pp.Contract)
+                    @Html.DisplayFor(x => pp.TradeType)
                 </td>
                 <td>
                     @Html.DisplayFor(x => pp.Price)
