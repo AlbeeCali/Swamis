@@ -50,13 +50,12 @@ namespace Sawtooth.Swamis.Controllers
 
         public ActionResult ViewTriggers(DateTime tradeDate)
         {
-            DailyTriggersModel dt = new DailyTriggersModel();
+            DailyTriggersModel dt = new DailyTriggersModel { TradeDate = tradeDate };
             MongoEngine db = new MongoEngine();
             DailyTriggers trigger = new DailyTriggers { TradeDate = tradeDate };
             List<DailyTriggers> triggers = db.GetTrigger(trigger);
             if (triggers.Count > 0)
             {
-                dt.TradeDate = triggers.First().TradeDate;
                 dt.Patterns = triggers.First().Patterns;
             }
             //dt.Patterns = dt.Patterns.OrderBy(pp => pp.Contract).ThenBy(pp => pp.TradeType) as List<PricePattern>;
