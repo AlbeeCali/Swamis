@@ -36,7 +36,7 @@
         <th>Code</th>
         <th>Contract</th>
         <th>Price</th>
-        <th></th>
+        <th>@Html.DisplayFor(m => m.TradeDate)</th>
         <th></th>
     </tr>
     @if (Model.Patterns != null)
@@ -49,10 +49,10 @@
                     @Html.DisplayFor(x => pp.Contract)
                 </td>
                 <td>
-                    @Html.DisplayFor(x => pp.Code)
+                    @Html.DisplayFor(x => pp.TradeType)
                 </td>
                 <td>
-                    @Html.DisplayFor(x => pp.TradeType)
+                    @Html.DisplayFor(x => pp.Code)
                 </td>
                 <td>
                     @Html.DisplayFor(x => pp.Price)
