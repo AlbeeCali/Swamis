@@ -24,6 +24,10 @@ namespace Sawtooth.Swamis.Controllers
         // GET: Triggers
         public ActionResult Index()
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             DailyTriggersModel dt = new DailyTriggersModel();
             DateTime tradeDate = DateTime.Today;
             switch (DateTime.Today.DayOfWeek)
@@ -64,6 +68,10 @@ namespace Sawtooth.Swamis.Controllers
 
         public ActionResult ViewTriggersSvc(DateTime tradeDate)
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             DailyTriggersModel dt = new DailyTriggersModel();
             string path = ConfigurationManager.AppSettings["triggersSvc"];
             string action = "GetTrigger/" +

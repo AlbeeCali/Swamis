@@ -25,6 +25,10 @@ namespace Swamis.Controllers
         // GET: Trades
         public ActionResult Index()
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             SearchModel model = new SearchModel();
 
             switch (DateTime.Today.DayOfWeek)
@@ -109,6 +113,10 @@ namespace Swamis.Controllers
 
         public ActionResult ViewTrades(DateTime startDate, DateTime endDate)
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             SearchModel model = new SearchModel
             {
                 StartDate = startDate,
@@ -163,6 +171,10 @@ namespace Swamis.Controllers
         // GET: Trades/Details/5
         public ActionResult Details(string id)
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             string result = "";
             string path = ConfigurationManager.AppSettings["tradesSvc"];
             string action = "GetTrade/x/" + id;
@@ -181,6 +193,10 @@ namespace Swamis.Controllers
         // GET: Trades/Create
         public ActionResult Create()
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             //ViewBag.Symbols = GetSymbols();
             DailyTradesModel model = new DailyTradesModel();
             model.TradeSymbols = GetSymbols();
@@ -327,6 +343,10 @@ namespace Swamis.Controllers
         // GET: Trades/Edit/5
         public ActionResult Edit(string id)
         {
+            if (!userAuthorized())
+            {
+                return RedirectToAction("Login", "Account");
+            }
             string result = "";
             string path = ConfigurationManager.AppSettings["tradesSvc"];
             string action = "GetTrade/x/" + id;

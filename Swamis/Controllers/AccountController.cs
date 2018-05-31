@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -9,6 +10,10 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Swamis.Models;
+
+using Sawtooth.GV_Entities;
+using Sawtooth.GV_Bus;
+using SawTooth.GV_Bus;
 
 namespace Swamis.Controllers
 {
@@ -73,22 +78,52 @@ namespace Swamis.Controllers
                 return View(model);
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-            switch (result)
+            bool authorized = false;
+
+            BusBase bus = new BusBase();
+            Users user = new Users
             {
-                case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
-                case SignInStatus.LockedOut:
-                    return View("Lockout");
-                case SignInStatus.RequiresVerification:
-                    return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                case SignInStatus.Failure:
-                default:
-                    ModelState.AddModelError("", "Invalid login attempt.");
-                    return View(model);
+                UserId = model.Email.ToLower(),
+                Enabled = true,
+                EnrollDate = DateTime.Now,
+                Password = model.Password
+            };
+            MongoEngine mongo = new MongoEngine();
+            var uu = mongo.GetUser(user);
+            if (uu.Count > 0)
+            {
+                if (bus.ValidPassword(user.Password, uu[0].Password))
+                {
+                    authorized = true;
+                }
             }
+
+            if(authorized)
+            {
+                System.Web.HttpContext.Current.Session["currentuser"] = user.UserId;
+                return RedirectToAction("Index", "Trades");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(model);
+            }
+            //// This doesn't count login failures towards account lockout
+            //// To enable password failures to trigger account lockout, change to shouldLockout: true
+            ////var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            //switch (result)
+            //{
+            //    case SignInStatus.Success:
+            //        return RedirectToLocal(returnUrl);
+            //    case SignInStatus.LockedOut:
+            //        return View("Lockout");
+            //    case SignInStatus.RequiresVerification:
+            //        return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+            //    case SignInStatus.Failure:
+            //    default:
+            //        ModelState.AddModelError("", "Invalid login attempt.");
+            //        return View(model);
+            //}
         }
 
         //
@@ -392,6 +427,7 @@ namespace Swamis.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            System.Web.HttpContext.Current.Session["currentuser"] = null;
             return RedirectToAction("Index", "Home");
         }
 

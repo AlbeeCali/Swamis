@@ -94,5 +94,21 @@ namespace Sawtooth.Swamis.Controllers
             return sb.ToString();
         }
 
+        protected bool userAuthorized()
+        {
+            bool auth = false;
+            if(System.Web.HttpContext.Current.Session["currentuser"] != null)
+            {
+                var uu = System.Web.HttpContext.Current.Session["authUsers"].ToString().Split(',');
+                if(uu.Contains(System.Web.HttpContext.Current.Session["currentuser"].ToString()))
+                {
+                    auth = true;
+                }
+            }
+            return auth;
+        }
+
     }
+
+
 }
