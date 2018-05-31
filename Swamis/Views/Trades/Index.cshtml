@@ -6,7 +6,7 @@
 }
 
 <h2>Trades Home</h2>
-@using (Html.BeginForm())
+@using (Html.BeginForm("Index","Trades", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.DoQuote)
@@ -80,12 +80,12 @@
     function quoteClick() {
         $("#DoQuote").val("True");
         $("#DoTrigger").val("False");
-        $("form:first").submit();
+        $("form:last").submit();
     }
     function triggerClick() {
         $("#DoQuote").val("False");
         $("#DoTrigger").val("True");
-        $("form:first").submit();
+        $("form:last").submit();
     }
 
 
